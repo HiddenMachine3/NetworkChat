@@ -20,6 +20,8 @@ public class Server {
 
     private static HashMap<String, HashSet<String>> block_list = new HashMap<>();
 
+    private static HashMap<String, HashSet<String>> private_group_members_of_person = new HashMap<>();
+
     public static void main(String[] args) throws Exception {
         System.out.println("The chat server is running...");
         var pool = Executors.newFixedThreadPool(500);

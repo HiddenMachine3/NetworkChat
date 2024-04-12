@@ -29,6 +29,9 @@ public class Client {
 
     String current_client_name = "";
 
+    boolean private_mode = false;
+    HashSet<String> private_mode_clients = new HashSet<>();
+
     /**
      * Constructs the client by laying out the GUI and registering a listener with
      * the textfield so that pressing Return in the listener sends the textfield
@@ -97,6 +100,35 @@ public class Client {
 
                             out.println("UNBLOCK " + String.join(" ", unblocked_clients));
                             break;
+                        case "PM":
+                            arguments =  line.substring(4).split(" ");
+                            String pm_command = arguments[1];
+                            switch(pm_command){
+                                case "ENTER":
+                                    private_mode = true;
+                                    break;
+                                case "LEAVE":
+                                    private_mode = false;
+                                    break;
+                                case "PRINT":
+                                    messageArea.append("Private mode is currently : "+ (private_mode?"ON":"OFF")+"\n");
+                                    if (!private_mode_clients.isEmpty()){
+                                        messageArea.append("The clients in your private group are : "+String.join(", ",private_mode_clients) +"\n");
+                                    }
+                                    break;
+                                case "ADD":
+                                    for(int i=2;i<arguments.length;i++){
+                                        String client_name = arguments[i];
+                                        private_mode_clients.add(client_name);
+                                    }
+                                    break;
+                                case "REMOVE":
+                                    for(int i=2;i<arguments.length;i++){
+                                        String client_name = arguments[i];
+                                        private_mode_clients.remove(client_name);
+                                    }
+                                    break;
+                            }
 
                     }
 
