@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.Executors;
+
 public class Server {
 
     // All client names, so we can check for duplicates upon registration.
@@ -15,6 +14,11 @@ public class Server {
 
     // The set of all the print writers for all the clients, used for broadcast.
     private static Set<PrintWriter> writers = new HashSet<>();
+
+    private static HashMap<String, PrintWriter> name_writer_map = new HashMap<>();
+    private static HashMap<PrintWriter, String> writer_name_map = new HashMap<>();
+
+    private static HashMap<String, HashSet<String>> block_list = new HashMap<>();
 
     public static void main(String[] args) throws Exception {
         System.out.println("The chat server is running...");
@@ -78,6 +82,8 @@ public class Server {
                     writer.println("MESSAGE " + name + " has joined");
                 }
                 writers.add(out);
+                name_writer_map.put(name, out); // we want to associate this name with this printWriter object
+                writer_name_map.put(out, name);
 
                 // Accept messages from this client and broadcast them.
                 while (true) {
@@ -85,8 +91,47 @@ public class Server {
                     if (input.toLowerCase().startsWith("/quit")) {
                         return;
                     }
-                    for (PrintWriter writer : writers) {
-                        writer.println("MESSAGE " + name + ": " + input);
+                    if (input.startsWith("BLOCK")) {
+
+                        String words[] = input.split(" ");
+
+                        for (int i = 1; i < words.length; i++) {
+                            String client_name = words[i];
+                            if (!block_list.containsKey(name)) {
+                                block_list.put(name, new HashSet<>());
+                            }
+                            block_list.get(name).add(client_name);
+                            System.out.println(name + " has blocked " + client_name);
+                        }
+                        System.out.println(block_list.toString());
+                    } else if (input.startsWith("UNBLOCK")) {
+                        String words[] = input.split(" ");
+
+                        for (int i = 1; i < words.length; i++) {
+                            String client_name = words[i];
+                            if (!block_list.containsKey(name)) {
+                                break;
+                            }
+                            block_list.get(name).remove(client_name);
+                            System.out.println(name + " has unblocked " + client_name);
+
+                        }
+                        System.out.println(block_list.toString());
+                    } else {
+                        for (PrintWriter writer : writers) {
+
+                            // if <name> had blocked someone, they are not allowing the PrinterWriter
+                            // associated with that person to send messages to them, and vice versa
+                            String name_of_writer = writer_name_map.get(writer);
+
+                            if (block_list.getOrDefault(name, new HashSet<>()).contains(name_of_writer))
+                                continue;
+
+                            if (block_list.getOrDefault(name_of_writer, new HashSet<>()).contains(name))
+                                continue;
+
+                            writer.println("MESSAGE " + name + ": " + input);
+                        }
                     }
                 }
             } catch (Exception e) {

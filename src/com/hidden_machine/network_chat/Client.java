@@ -38,7 +38,6 @@ public class Client {
      */
     public Client(String serverAddress) {
         this.serverAddress = serverAddress;
-
         textField.setEditable(false);
         messageArea.setEditable(false);
         frame.getContentPane().add(textField, BorderLayout.SOUTH);
@@ -49,10 +48,14 @@ public class Client {
         textField.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String line = textField.getText();
-                if (line.startsWith("CMD")) {
+                if (line.startsWith("CMD:")) {
+                    String[] arguments =  null;
 
-                    String[] arguments =  line.substring(4).split(" ");
-                    String cmd_command =arguments[0];
+                    int cmd_command_end_index = line.indexOf(" ");
+                    if (cmd_command_end_index == -1)
+                        cmd_command_end_index = line.length();
+
+                    String cmd_command = line.substring(line.indexOf(":")+1,cmd_command_end_index);
                     switch (cmd_command) {
                         case "CLR":
                             messageArea.setText("");
@@ -68,11 +71,12 @@ public class Client {
                             messageArea.append("Server Port ID: "+ port_number + "\n");
                             break;
                         case "BLOCK":
+                            arguments =  line.substring(4).split(" ");
                             HashSet<String> blocked_clients = new HashSet<>();
 
                             for(int i =1;i<arguments.length;i++){
                                 if (arguments[i].equals(current_client_name)){
-                                    System.out.println("ERROR: You cannot block or unblock yourself!!!");
+                                    out.println("ERROR: You cannot block yourself!!!");
                                     continue;
                                 }
                                 blocked_clients.add(arguments[i]);
@@ -82,10 +86,10 @@ public class Client {
                             break;
                         case "UNBLOCK":
                             HashSet<String> unblocked_clients = new HashSet<>();
-
+                            arguments =  line.substring(4).split(" ");
                             for(int i =1;i<arguments.length;i++){
                                 if (arguments[i].equals(current_client_name)){
-                                    System.out.println("ERROR: You cannot block or unblock yourself!!!");
+                                    out.println("ERROR: You cannot unblock yourself!!!");
                                     continue;
                                 }
                                 unblocked_clients.add(arguments[i]);
