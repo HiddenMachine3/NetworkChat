@@ -97,11 +97,13 @@ public class Server {
 
                         String words[] = input.split(" ");
 
+                        if (!block_list.containsKey(name)) {
+                            block_list.put(name, new HashSet<>());
+                        }
+
                         for (int i = 1; i < words.length; i++) {
                             String client_name = words[i];
-                            if (!block_list.containsKey(name)) {
-                                block_list.put(name, new HashSet<>());
-                            }
+
                             block_list.get(name).add(client_name);
                             System.out.println(name + " has blocked " + client_name);
                         }
@@ -109,18 +111,64 @@ public class Server {
                     } else if (input.startsWith("UNBLOCK")) {
                         String words[] = input.split(" ");
 
+                        if (!block_list.containsKey(name)) {
+                            continue;
+                        }
+
                         for (int i = 1; i < words.length; i++) {
                             String client_name = words[i];
-                            if (!block_list.containsKey(name)) {
-                                break;
-                            }
+
                             block_list.get(name).remove(client_name);
                             System.out.println(name + " has unblocked " + client_name);
 
                         }
                         System.out.println(block_list.toString());
+                    } else if (input.startsWith("PM REMOVE")) {
+
+                        String words[] = input.split(" ");
+
+                        if (!private_group_members_of_person.containsKey(name)) {
+                            continue;
+                        }
+
+                        for (int i = 2; i < words.length; i++) {
+                            String client_name = words[i];
+//                            if (names.contains(client_name)) { // we don't have to check if its a valid name here because nothing will happen if it isn't
+                            private_group_members_of_person.get(name).remove(client_name);
+                            System.out.println(name + " has removed " + client_name + " from the private group chat");
+
+                        }
+                        System.out.println(private_group_members_of_person.get(name).toString());
+                    } else if (input.startsWith("PM ADD")) {
+
+                        String words[] = input.split(" ");
+
+                        if (!private_group_members_of_person.containsKey(name)) {
+                            private_group_members_of_person.put(name, new HashSet<>());
+                        }
+
+                        for (int i = 2; i < words.length; i++) {
+                            String client_name = words[i];
+                            if (names.contains(client_name)) {
+                                // Adding only valid client names to the private group chat members list
+                                private_group_members_of_person.get(name).add(client_name);
+                                System.out.println(name + " has added " + client_name + " to the private group chat");
+                            }
+                        }
+                        System.out.println(private_group_members_of_person.get(name).toString());
                     } else {
-                        for (PrintWriter writer : writers) {
+                        int end_index = input.indexOf(";", 1);
+                        boolean private_mode = Boolean.parseBoolean(input.substring(1, end_index));
+                        String actual_message = input.substring(end_index+1);
+
+                        LinkedList<PrintWriter> private_chat_writers = new LinkedList<>();
+                        for (String name : private_group_members_of_person.getOrDefault(name, new HashSet<>())) {
+                            if (name_writer_map.containsKey(name))
+                                private_chat_writers.add(name_writer_map.get(name));
+                        }
+                        private_chat_writers.add(name_writer_map.get(name)); // obviously, you would also want the current client to see his own private message
+
+                        for (PrintWriter writer : (private_mode ? private_chat_writers : writers)) {
 
                             // if <name> had blocked someone, they are not allowing the PrinterWriter
                             // associated with that person to send messages to them, and vice versa
@@ -132,8 +180,10 @@ public class Server {
                             if (block_list.getOrDefault(name_of_writer, new HashSet<>()).contains(name))
                                 continue;
 
-                            writer.println("MESSAGE " + name + ": " + input);
+
+                            writer.println("MESSAGE " + name + ": " + actual_message);
                         }
+
                     }
                 }
             } catch (Exception e) {
