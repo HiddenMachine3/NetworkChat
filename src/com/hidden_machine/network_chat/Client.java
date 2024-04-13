@@ -67,8 +67,11 @@ public class Client {
                         case "CAPITAL":
                         case "SMALL":
                         case "BOTH":
+                            System.out.println("CASE CHANGE : " + line);
                             letter_case = cmd_command;
-                            out.println(line);
+
+                            out.println(";" + private_mode + ";" + line);
+
                             break;
 
                         case "ID":
@@ -124,8 +127,8 @@ public class Client {
                                         private_mode_clients.add(client_name);
                                         new_clients.add(client_name);
                                     }
-                                    if(!new_clients.isEmpty())
-                                        out.println("PM ADD "+ String.join(" ", new_clients));
+                                    if (!new_clients.isEmpty())
+                                        out.println("PM ADD " + String.join(" ", new_clients));
 
                                     break;
                                 case "REMOVE":
@@ -135,8 +138,8 @@ public class Client {
                                         private_mode_clients.remove(client_name);
                                         new_clients_to_remove.add(client_name);
                                     }
-                                    if(!new_clients_to_remove.isEmpty())
-                                        out.println("PM REMOVE "+ String.join(" ", new_clients_to_remove));
+                                    if (!new_clients_to_remove.isEmpty())
+                                        out.println("PM REMOVE " + String.join(" ", new_clients_to_remove));
                                     break;
                             }
 
@@ -179,10 +182,12 @@ public class Client {
                     } else if (letter_case.equals("SMALL")) {
                         modified_line = modified_line.toLowerCase();
                     }
-
+                    System.out.println(modified_line);
                     messageArea.append(modified_line + "\n");
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             frame.setVisible(false);
             frame.dispose();
