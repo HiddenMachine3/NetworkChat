@@ -83,12 +83,12 @@ public class Client {
 
                             for (int i = 1; i < arguments.length; i++) {
                                 if (arguments[i].equals(current_client_name)) {
-                                    out.println("ERROR: You cannot block yourself!!!");
+                                    messageArea.append("ERROR: You cannot block yourself!!!\n");
                                     continue;
                                 }
                                 blocked_clients.add(arguments[i]);
                             }
-
+                            if (!blocked_clients.isEmpty())
                             out.println("BLOCK " + String.join(" ", blocked_clients));
                             break;
                         case "UNBLOCK":
@@ -96,7 +96,7 @@ public class Client {
                             arguments = line.substring(4).split(" ");
                             for (int i = 1; i < arguments.length; i++) {
                                 if (arguments[i].equals(current_client_name)) {
-                                    out.println("ERROR: You cannot unblock yourself!!!");
+                                    messageArea.append("ERROR: You cannot unblock yourself!!!\n");
                                     continue;
                                 }
                                 unblocked_clients.add(arguments[i]);
