@@ -26,7 +26,7 @@ public class Client {
     JTextArea messageArea = new JTextArea(16, 50);
 
     String letter_case = "BOTH";
-    final int port_number = 59001;
+    int port_number = 59001;
 
     String current_client_name = "";
 
@@ -40,7 +40,8 @@ public class Client {
      * editable, and only becomes editable AFTER the client receives the
      * NAMEACCEPTED message from the server.
      */
-    public Client(String serverAddress) {
+    public Client(String serverAddress, int port_number) {
+        this.port_number = port_number;
         this.serverAddress = serverAddress;
         textField.setEditable(false);
         messageArea.setEditable(false);
@@ -195,12 +196,15 @@ public class Client {
     }
 
     public static void main(String[] args) throws Exception {
-//        if (args.length != 1) {
-//            System.err.println("Pass the server IP as the sole command line argument");
-//            return;
-//        }
-        String server_ip = "localhost";
-        var client = new Client(server_ip);
+        String server_ip = "localhost"; // default server ip address
+        int port_id = 59001; //default port number
+        if (args.length > 0) {
+            server_ip = args[0];
+            if (args.length >1) {
+                port_id = Integer.parseInt(args[1]);
+            }
+        }
+        Client client = new Client(server_ip, port_id);
         client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         client.frame.setVisible(true);
         client.run();
